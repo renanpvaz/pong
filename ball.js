@@ -3,8 +3,8 @@ class Ball {
     const translate = getTranslate($element);
 
     this.acceleration = {
-      y: 5,
-      x: 5
+      y: 0,
+      x: -3
     };
 
     this.posY = translate.y;
@@ -12,13 +12,14 @@ class Ball {
     this.$element = $element;
 
     window.addEventListener('update', this.update.bind(this));
+    window.addEventListener('padcollision', debounce(this.handleCollision.bind(this), 100, true));
   }
 
   invert(dimension) {
     this.acceleration[dimension] = this.acceleration[dimension] * (-1);
   }
 
-  checkColision() {
+  checkBoundsCollision() {
     if ((this.posX <= -600 && this.acceleration.x < 0) || (this.posX >= 600 && this.acceleration.x > 0)) {
       this.invert('x');
     }
@@ -28,15 +29,17 @@ class Ball {
     }
   }
 
+  handleCollision() {
+    this.invert('x');
+    this.invert('y');
+  }
+
   update() {
-    const nextPosY = this.posY + this.acceleration.y;
-    const nextPosX = this.posX + this.acceleration.x;
+    this.posY += this.acceleration.y;
+    this.posX += this.acceleration.x;
 
-    this.posY = nextPosY;
-    this.posX = nextPosX;
+    this.checkBoundsCollision();
 
-    this.checkColision();
-
-    moveElement(this.$element, nextPosY, nextPosX);
+    moveElement(this.$element, this.posY, this.posX);
   }
 }
