@@ -19,6 +19,15 @@
         position: absolute;
       }
 
+      .ball {
+        position: absolute;
+        top: 50%;
+        right: 50%;
+        width: 30px;
+        height: 30px;
+        background-color: #fff;
+      }
+
       .right {
         right: 0;
       }
@@ -29,51 +38,9 @@
     </style>
 
     <div class="pad left" style="transform: translateY(0%)"></div>
+    <div class="ball" style="transform: translate3d(0px, 0px, 0px);"></div>
     <div class="pad right" style="transform: translateY(0%)"></div>
 
-    <script type="text/javascript">
-      window.addEventListener('load', () => {
-        const PAD_ACCELERATION = 20;
-        const $left = document.querySelector('.pad.left');
-        const $right = document.querySelector('.pad.right');
-
-        function move($element, acceleration) {
-          const y = parseInt(
-            $element.style.transform.replace(/translateY|\(|\)|%/g, '')
-          );
-
-          window.requestAnimationFrame(() => {
-            $element.style.transform = `translateY(${y + acceleration}%)`;
-          });
-        }
-
-        const keys = {
-          '87': {
-            name: 'W',
-            onPress: () => move($left, -PAD_ACCELERATION)
-          },
-          '83': {
-            name: 'S',
-            onPress: () => move($left, PAD_ACCELERATION)
-          },
-          '38': {
-            name: 'UP',
-            onPress: () => move($right, -PAD_ACCELERATION)
-          },
-          '40': {
-            name: 'DOWN',
-            onPress: () => move($right, PAD_ACCELERATION)
-          },
-        };
-
-        window.addEventListener('keydown', function (e) {
-          const key = keys[e.keyCode];
-
-          if (key) {
-            key.onPress();
-          }
-        });
-      });
-    </script>
+    <script src="index.js"></script>
   </body>
 </html>
