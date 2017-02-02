@@ -4,7 +4,7 @@ class Ball {
 
     this.acceleration = {
       y: 0,
-      x: -3
+      x: 5
     };
 
     this.posY = translate.y;
@@ -31,7 +31,6 @@ class Ball {
 
   handleCollision() {
     this.invert('x');
-    this.invert('y');
   }
 
   update() {
