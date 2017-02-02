@@ -1,6 +1,8 @@
 class Pong {
   constructor() {
-    this.ball = new Ball(document.querySelector('.ball'));
+    // this.ball = new Ball(document.querySelector('.ball'));
+    this.leftPad = new Pad(document.querySelector('.pad.left'));
+
     this.tick();
   }
 

@@ -17,6 +17,7 @@
         margin: 30px;
         background-color: #fff;
         position: absolute;
+        top: 50%;
       }
 
       .ball {
@@ -37,13 +38,14 @@
       }
     </style>
 
-    <div class="pad left" style="transform: translateY(0%)"></div>
+    <div class="pad left" style="transform: translate3d(0px, 0px, 0px);"></div>
     <div class="ball" style="transform: translate3d(0px, 0px, 0px);"></div>
-    <div class="pad right" style="transform: translateY(0%)"></div>
+    <div class="pad right" style="transform: translate3d(0px, 0px, 0px);"></div>
 
     <script async src="index.js"></script>
     <script src="util.js"></script>
     <script src="ball.js"></script>
+    <script src="pad.js"></script>
     <script src="game.js"></script>
   </body>
 </html>

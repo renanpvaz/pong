@@ -1,4 +1,4 @@
-function move($element, y, x) {
+function moveElement($element, y, x) {
   window.requestAnimationFrame(() => {
     $element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
   });

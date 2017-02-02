@@ -37,6 +37,6 @@ class Ball {
 
     this.checkColision();
 
-    move(this.$element, nextPosY, nextPosX);
+    moveElement(this.$element, nextPosY, nextPosX);
   }
 }
