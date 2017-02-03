@@ -9,11 +9,11 @@ class Pong {
     this.padArea = screen.width / 3;
     this.yBounds = ($container.clientHeight / 2) - (BALL_SIZE / 2);
     this.xBounds = ($container.clientWidth / 2) - (BALL_SIZE / 2);
+  }
 
+  start(client, isMaster) {
     this.ball = new Ball(document.querySelector('.ball'));
-    this.leftPad = new Pad(document.querySelector('.pad.left'));
-    this.rightPad = new Pad(document.querySelector('.pad.right'), 38, 40);
-
+    this.client.on('message', this.onMessage.bind(this));
     this.lastRequest = requestAnimationFrame(this.tick.bind(this));
 
     window.addEventListener('keyup', (e) => {
@@ -23,39 +23,27 @@ class Pong {
         this.tick();
       }
     });
+  }
 
-    this.client = mqtt.connect('mqtt://10.99.3.69:1884');
-    this.client.on('error', console.log);
+  onMessage(topic, payload) {
+    const message = payload.toString();
 
-    this.client.on('connect', () => {
-      this.client.subscribe('ball/acceleration');
-      this.client.subscribe('ball/positions');
-      this.client.subscribe('master');
-    });
+    switch (topic) {
+      case 'ball/acceleration':
+        const [aX, aY] = message.split(',').map(val => parseInt(val));
+        this.ball.acceleration = { x: aX, y: aY };
+        this.client.unsubscribe('ball/acceleration');
+        break;
+      case 'ball/positions':
+        const parts = message.split(',');
+        this.ball.posX = parts[0] >> 0;
+        this.ball.posY = parts[1] >> 0;
+        break;
+    }
+  }
 
-    this.client.on('message', (topic, payload) => {
-      const message = payload.toString();
-
-      switch (topic) {
-        case 'ball/acceleration':
-          const [aX, aY] = message.split(',').map(val => parseInt(val));
-          this.ball.acceleration = { x: aX, y: aY };
-          break;
-        case 'ball/positions':
-          const parts = message.split(',');
-          this.ball.posX = parts[0] >> 0;
-          this.ball.posY = parts[1] >> 0;
-          break;
-        case 'master':
-          this.ball.master = message === this.client.options.clientId;
-          this.client.publish(
-            'ball/acceleration',
-            `${this.ball.acceleration.x},${this.ball.acceleration.y}`,
-            () => this.client.unsubscribe(['master', 'ball/acceleration'])
-          );
-          break;
-      }
-    });
+  createPad(which) {
+    this[`${which}Pad`] = new Pad(document.querySelector(`.pad.${which}`));
   }
 
   checkXCollision() {
@@ -103,7 +91,7 @@ class Pong {
     if (this.ball.master) {
       setTimeout(this.checkXCollision.bind(this), 0);
       setTimeout(this.checkYCollision.bind(this), 0);
-      
+
       this.client.publish('ball/positions', (this.ball.posX + ',' + this.ball.posY));
     }
 

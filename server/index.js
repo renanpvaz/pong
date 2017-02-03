@@ -20,13 +20,9 @@ server.on('ready', () => {
 });
 
 server.on('clientConnected', (client) => {
-  pino.info('client connected', client.id);
-});
-
-server.on('subscribed', (topic, client) => {
   if (!topics.waiting) {
     topics.waiting = client;
-    server.publish({ topic: 'master', payload: client.id });
+    server.publish({ topic: 'whoami', payload: client.id });
     pino.info('left player is waiting');
   } else {
     topics.games[topics.waiting.id] = {
