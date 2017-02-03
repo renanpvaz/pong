@@ -14,7 +14,6 @@ class Pong {
     this.leftPad = new Pad(document.querySelector('.pad.left'));
     this.rightPad = new Pad(document.querySelector('.pad.right'), 38, 40);
 
-    // window.addEventListener('blur', this.pause.bind(this));
     window.addEventListener('keyup', (e) => {
       if ((e.keyCode || e.which) === 80 && !this.paused) {
         this.pause();
@@ -25,20 +24,38 @@ class Pong {
 
     requestAnimationFrame(this.tick.bind(this));
 
-    this.client = mqtt.connect('mqtt://localhost:1884');
+    this.client = mqtt.connect('mqtt://10.99.3.69:1884');
     this.client.on('error', console.log);
 
     this.client.on('connect', () => {
-      this.client.subscribe('game');
+      this.client.subscribe('ball/acceleration');
+      this.client.subscribe('ball/positions');
+      this.client.subscribe('master');
     });
 
-    this.client.on('message', (topic, message) => {
-      const [posX, posY, aX, aY] = message.toString().split(',').map(val => parseInt(val));
+    this.client.on('message', (topic, payload) => {
+      const message = payload.toString();
 
-      if (this.ball.posX !== posX && this.ball.posY !== posY) {
-        this.ball.posX = posX;
-        this.ball.posY = posY;
-        this.ball.acceleration = { x: aX, y: aY };
+      switch (topic) {
+        case 'ball/acceleration':
+          const [aX, aY] = message.split(',').map(val => parseInt(val));
+          this.ball.acceleration = { x: aX, y: aY };
+          break;
+        case 'ball/positions':
+          if (!this.ball.master) {
+            const [pX, pY] = message.split(',').map(val => parseInt(val));
+            this.ball.posX = pX;
+            this.ball.posY = pY;
+          }
+          break;
+        case 'master':
+          this.ball.master = message === this.client.options.clientId;
+          this.client.publish(
+            'ball/acceleration',
+            `${this.ball.acceleration.x},${this.ball.acceleration.y}`,
+            () => this.client.unsubscribe(['master', 'ball/acceleration'])
+          );
+          break;
       }
     });
   }
@@ -47,13 +64,13 @@ class Pong {
     const { $element, goingLeft, posX: x } = this.ball;
 
     if (x <= -(this.padArea) && goingLeft) {
-      if (areElementsOverlaping(this.leftPad.$element, $element)) {
+      if (areElementsOverlapping(this.leftPad.$element, $element)) {
         this.emit('padcollision');
       } else if (x <= -this.xBounds) {
         this.score(goingLeft);
       }
     } else if (x >= (this.padArea) && !goingLeft) {
-      if (areElementsOverlaping(this.rightPad.$element, $element)) {
+      if (areElementsOverlapping(this.rightPad.$element, $element)) {
         this.emit('padcollision');
       } else if (x >= this.xBounds) {
         this.score(goingLeft);
@@ -84,9 +101,12 @@ class Pong {
   tick() {
     this.paused = false;
     this.emit('update');
-    this.client.publish('game', `${this.ball.posX},${this.ball.posY},${this.ball.acceleration.x},${this.ball.acceleration.y}`);
-    setTimeout(this.checkXCollision.bind(this), 0);
-    setTimeout(this.checkYCollision.bind(this), 0);
+    this.client.publish('ball/positions', `${this.ball.posX},${this.ball.posY}`);
+
+    if (this.ball.master) {
+      setTimeout(this.checkXCollision.bind(this), 0);
+      setTimeout(this.checkYCollision.bind(this), 0);
+    }
 
     this.lastRequest = requestAnimationFrame(this.tick.bind(this));
   }

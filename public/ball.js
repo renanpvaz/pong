@@ -6,6 +6,7 @@ class Ball {
     this.posY = 0;
     this.posX = 0;
     this.$element = $element;
+    this.master = true;
 
     window.addEventListener('update', this.update.bind(this));
     window.addEventListener('padcollision', debounce(() => this.invert('x'), 100, true));
@@ -37,8 +38,10 @@ class Ball {
   }
 
   update() {
-    this.posY += this.acceleration.y;
-    this.posX += this.acceleration.x;
+    if (this.master) {
+      this.posY += this.acceleration.y;
+      this.posX += this.acceleration.x;
+    }
 
     moveElement(this.$element, this.posY, this.posX);
   }

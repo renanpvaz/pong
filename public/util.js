@@ -1,26 +1,27 @@
 function moveElement($element, y, x) {
-  $element.style.transform = `translate3d(${x}px, ${y * (-1)}px, 0)`; // invert y to work as a cartesian plane
+  $element.style.transform = 'translate3d(' + x + 'px, ' + (-y) + 'px, 0)'; // invert y to work as a cartesian plane
 }
 
-function areElementsOverlaping(a, b) {
-    const getPositions = (elem) => {
-      const pos = elem.getBoundingClientRect();
-      return [[pos.left, pos.right], [pos.top, pos.bottom]];
-    };
+function getPositions(elem) {
+  const pos = elem.getBoundingClientRect();
 
-    const comparePositions = (posA, posB) => {
-      let resulA, resultB;
+  return [[pos.left, pos.right], [pos.top, pos.bottom]];
+}
 
-      resulA = posA[0] < posB[0] ? posA : posB;
-      resultB = posA[0] < posB[0] ? posB : posA;
+function comparePositions(posA, posB) {
+  let resulA, resultB;
 
-      return resulA[1] > resultB[0] || resulA[0] === resultB[0];
-    };
+  resulA = posA[0] < posB[0] ? posA : posB;
+  resultB = posA[0] < posB[0] ? posB : posA;
 
-    const posA = getPositions(a);
-    const posB = getPositions(b);
+  return resulA[1] > resultB[0] || resulA[0] === resultB[0];
+}
 
-    return comparePositions(posA[0], posB[0]) && comparePositions(posA[1], posB[1]);
+function areElementsOverlapping(a, b) {
+  const posA = getPositions(a);
+  const posB = getPositions(b);
+
+  return comparePositions(posA[0], posB[0]) && comparePositions(posA[1], posB[1]);
 }
 
 function debounce(func, wait, immediate) {

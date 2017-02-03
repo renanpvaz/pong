@@ -26,6 +26,7 @@ server.on('clientConnected', (client) => {
 server.on('subscribed', (topic, client) => {
   if (!topics.waiting) {
     topics.waiting = client;
+    server.publish({ topic: 'master', payload: client.id });
     pino.info('left player is waiting');
   } else {
     topics.games[topics.waiting.id] = {
