@@ -3,10 +3,12 @@ class Pong {
     const $container = document.querySelector('.container');
     const BALL_SIZE = 30;
 
+    this.$scores = document.querySelectorAll('.container h1');
+
     this.points = { left: 0, right: 0 };
     this.padArea = screen.width / 3;
     this.yBounds = ($container.clientHeight / 2) - (BALL_SIZE / 2);
-    this.xBounds = ($container.widthHeight / 2) - (BALL_SIZE / 2);
+    this.xBounds = ($container.clientWidth / 2) - (BALL_SIZE / 2);
 
     this.ball = new Ball(document.querySelector('.ball'));
     this.leftPad = new Pad(document.querySelector('.pad.left'));
@@ -21,11 +23,13 @@ class Pong {
     if (x <= -(this.padArea) && goingLeft) {
       if (areElementsOverlaping(this.leftPad.$element, $element)) {
         this.emit('padcollision');
+      } else if (x <= -this.xBounds) {
+        this.score(goingLeft);
       }
     } else if (x >= (this.padArea) && !goingLeft) {
       if (areElementsOverlaping(this.rightPad.$element, $element)) {
         this.emit('padcollision');
-      } else if ((x >= this.xBounds && !goingLeft) || (x <= -this.xBounds && goingLeft)) {
+      } else if (x >= this.xBounds) {
         this.score(goingLeft);
       }
     }
@@ -41,10 +45,14 @@ class Pong {
 
   score(goingLeft) {
     if (goingLeft) {
-      this.poins.left++;
+      this.points.left++;
+      this.$scores[0].textContent = this.points.left;
     } else {
-      this.poins.right++;
+      this.points.right++;
+      this.$scores[1].textContent = this.points.right;
     }
+
+    this.ball.respawn('score');
   }
 
   tick() {
@@ -55,7 +63,7 @@ class Pong {
     requestAnimationFrame(this.tick.bind(this));
   }
 
-  emit(name, data) {
-    window.dispatchEvent(new Event(name, data));
+  emit(name) {
+    window.dispatchEvent(new Event(name));
   }
 }

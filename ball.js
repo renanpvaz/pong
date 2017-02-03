@@ -1,9 +1,6 @@
 class Ball {
   constructor($element) {
-    this.acceleration = {
-      y: 5 * (Math.round(Math.random()) || -1),
-      x: 5 * (Math.round(Math.random()) || -1)
-    };
+    this.acceleration = this.getRandomAcceleration();
 
     this.goingLeft = this.acceleration.x < 0;
     this.posY = 0;
@@ -18,6 +15,25 @@ class Ball {
   invert(dimension) {
     this.acceleration[dimension] = this.acceleration[dimension] * (-1);
     this.goingLeft = this.acceleration.x < 0;
+  }
+
+  getRandomAcceleration() {
+    return {
+      y: 5 * (Math.round(Math.random()) || -1),
+      x: 5 * (Math.round(Math.random()) || -1)
+    };
+  }
+
+  respawn() {
+    this.posY = 0;
+    this.posX = 0;
+    this.acceleration.y = 0;
+    this.acceleration.x = 0;
+
+    setTimeout(() => {
+      this.acceleration = this.getRandomAcceleration();
+      this.goingLeft = this.acceleration.x < 0;
+    }, 2001);
   }
 
   update() {
