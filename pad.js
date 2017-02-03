@@ -4,10 +4,10 @@ class Pad {
     const intervals = {};
     const keys = {
       [upKey]: {
-        press: () => this.move(-1)
+        press: () => this.move(1)
       },
       [downKey]: {
-        press: () => this.move(1)
+        press: () => this.move(-1)
       }
     };
 
