@@ -14,7 +14,7 @@ class Pong {
     this.leftPad = new Pad(document.querySelector('.pad.left'));
     this.rightPad = new Pad(document.querySelector('.pad.right'), 38, 40);
 
-    window.addEventListener('blur', this.pause.bind(this));
+    // window.addEventListener('blur', this.pause.bind(this));
     window.addEventListener('keyup', (e) => {
       if ((e.keyCode || e.which) === 80 && !this.paused) {
         this.pause();
@@ -24,6 +24,23 @@ class Pong {
     });
 
     requestAnimationFrame(this.tick.bind(this));
+
+    this.client = mqtt.connect('mqtt://localhost:1884');
+    this.client.on('error', console.log);
+
+    this.client.on('connect', () => {
+      this.client.subscribe('game');
+    });
+
+    this.client.on('message', (topic, message) => {
+      const [posX, posY, aX, aY] = message.toString().split(',').map(val => parseInt(val));
+
+      if (this.ball.posX !== posX && this.ball.posY !== posY) {
+        this.ball.posX = posX;
+        this.ball.posY = posY;
+        this.ball.acceleration = { x: aX, y: aY };
+      }
+    });
   }
 
   checkXCollision() {
@@ -67,6 +84,7 @@ class Pong {
   tick() {
     this.paused = false;
     this.emit('update');
+    this.client.publish('game', `${this.ball.posX},${this.ball.posY},${this.ball.acceleration.x},${this.ball.acceleration.y}`);
     setTimeout(this.checkXCollision.bind(this), 0);
     setTimeout(this.checkYCollision.bind(this), 0);
 
