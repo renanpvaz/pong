@@ -14,7 +14,16 @@ class Pong {
     this.leftPad = new Pad(document.querySelector('.pad.left'));
     this.rightPad = new Pad(document.querySelector('.pad.right'), 38, 40);
 
-    this.tick();
+    window.addEventListener('blur', this.pause.bind(this));
+    window.addEventListener('keyup', (e) => {
+      if ((e.keyCode || e.which) === 80 && !this.paused) {
+        this.pause();
+      } else if (this.paused) {
+        this.tick();
+      }
+    });
+
+    requestAnimationFrame(this.tick.bind(this));
   }
 
   checkXCollision() {
@@ -56,11 +65,17 @@ class Pong {
   }
 
   tick() {
+    this.paused = false;
     this.emit('update');
     setTimeout(this.checkXCollision.bind(this), 0);
     setTimeout(this.checkYCollision.bind(this), 0);
 
-    requestAnimationFrame(this.tick.bind(this));
+    this.lastRequest = requestAnimationFrame(this.tick.bind(this));
+  }
+
+  pause() {
+    this.paused = true;
+    cancelAnimationFrame(this.lastRequest);
   }
 
   emit(name) {
