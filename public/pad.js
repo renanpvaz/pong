@@ -18,13 +18,13 @@ class Pad {
       const keyCode = parseInt(code);
 
       window.addEventListener('keydown', (e) => {
-        if(!intervals[keyCode] && keyCode === (e.keyCode || e.which)) {
+        if(!intervals[keyCode] && keyCode === e.which) {
           intervals[keyCode] = setInterval(() => keys[keyCode].press(), 50);
         }
       });
 
       window.addEventListener('keyup', (e) => {
-        if(keyCode === (e.keyCode || e.which)) {
+        if(keyCode === e.which) {
           clearInterval(intervals[keyCode]);
           intervals[keyCode] = null;
         }
