@@ -5,7 +5,7 @@ class Pong {
 
     this.ball = new Ball(document.querySelector('.ball'));
     this.leftPad = new Pad(document.querySelector('.pad.left'));
-    this.rightPad = new Pad(document.querySelector('.pad.right'), '38', '40');
+    this.rightPad = new Pad(document.querySelector('.pad.right'), 38, 40);
 
     this.tick();
   }
@@ -34,8 +34,8 @@ class Pong {
 
   tick() {
     this.emit('update');
-    this.checkXCollision();
-    this.checkYCollision();
+    setTimeout(this.checkXCollision.bind(this), 0);
+    setTimeout(this.checkYCollision.bind(this), 0);
 
     requestAnimationFrame(this.tick.bind(this));
   }

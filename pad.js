@@ -1,31 +1,34 @@
 class Pad {
-  constructor($element, upKey = '87', downKey = '83') {
+  constructor($element, upKey = 87, downKey = 83) {
     const { y } = getTranslate($element);
-    let interval;
+    const intervals = {};
+    const keys = {
+      [upKey]: {
+        press: () => this.move(-1)
+      },
+      [downKey]: {
+        press: () => this.move(1)
+      }
+    };
 
     this.$element = $element;
     this.posY = y;
 
-    const keys = {
-      [upKey]: {
-        onPress: () => this.move(-1)
-      },
-      [downKey]: {
-        onPress: () => this.move(1)
-      },
-    };
+    Object.keys(keys).forEach((code) => {
+      const keyCode = parseInt(code);
 
-    window.addEventListener('keydown', (e) => {
-      const key = keys[e.keyCode];
+      window.addEventListener('keydown', (e) => {
+        if(!intervals[keyCode] && keyCode === (e.keyCode || e.which)) {
+          intervals[keyCode] = setInterval(() => keys[keyCode].press(), 50);
+        }
+      });
 
-      if(!interval && key){
-        interval = setInterval(key.onPress, 50);
-      }
-    });
-
-    window.addEventListener('keyup', (e) => {
-      clearInterval(interval);
-      interval = null;
+      window.addEventListener('keyup', (e) => {
+        if(keyCode === (e.keyCode || e.which)) {
+          clearInterval(intervals[keyCode]);
+          intervals[keyCode] = null;
+        }
+      });
     });
   }
 

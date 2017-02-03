@@ -3,7 +3,7 @@ class Ball {
     const translate = getTranslate($element);
 
     this.acceleration = {
-      y: 5,
+      y: 0,
       x: 5
     };
 
