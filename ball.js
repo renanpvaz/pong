@@ -1,14 +1,13 @@
 class Ball {
   constructor($element) {
-    const translate = getTranslate($element);
-
     this.acceleration = {
-      y: 0,
-      x: 5
+      y: 5 * (Math.round(Math.random()) || -1),
+      x: 5 * (Math.round(Math.random()) || -1)
     };
 
-    this.posY = translate.y;
-    this.posX = translate.x;
+    this.goingLeft = this.acceleration.x < 0;
+    this.posY = 0;
+    this.posX = 0;
     this.$element = $element;
 
     window.addEventListener('update', this.update.bind(this));
@@ -18,6 +17,7 @@ class Ball {
 
   invert(dimension) {
     this.acceleration[dimension] = this.acceleration[dimension] * (-1);
+    this.goingLeft = this.acceleration.x < 0;
   }
 
   update() {

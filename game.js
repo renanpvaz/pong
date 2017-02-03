@@ -1,7 +1,12 @@
 class Pong {
   constructor() {
+    const $container = document.querySelector('.container');
+    const BALL_SIZE = 30;
+
+    this.points = { left: 0, right: 0 };
     this.padArea = screen.width / 3;
-    this.yBounds = (document.querySelector('.container').clientHeight / 2) - 15;
+    this.yBounds = ($container.clientHeight / 2) - (BALL_SIZE / 2);
+    this.xBounds = ($container.widthHeight / 2) - (BALL_SIZE / 2);
 
     this.ball = new Ball(document.querySelector('.ball'));
     this.leftPad = new Pad(document.querySelector('.pad.left'));
@@ -11,24 +16,34 @@ class Pong {
   }
 
   checkXCollision() {
-    const x = this.ball.posX;
+    const { $element, goingLeft, posX: x } = this.ball;
 
-    if (x <= -(this.padArea) && x < 0) {
-      if (areElementsOverlaping(this.leftPad.$element, this.ball.$element)) {
+    if (x <= -(this.padArea) && goingLeft) {
+      if (areElementsOverlaping(this.leftPad.$element, $element)) {
         this.emit('padcollision');
       }
-    } else if (x >= (this.padArea) && x > 0) {
-      if (areElementsOverlaping(this.rightPad.$element, this.ball.$element)) {
+    } else if (x >= (this.padArea) && !goingLeft) {
+      if (areElementsOverlaping(this.rightPad.$element, $element)) {
         this.emit('padcollision');
+      } else if ((x >= this.xBounds && !goingLeft) || (x <= -this.xBounds && goingLeft)) {
+        this.score(goingLeft);
       }
     }
   }
 
   checkYCollision() {
-    const { posY: y, acceleration } = this.ball;
+    const { posY: y, goingLeft } = this.ball;
 
-    if ((y <= -this.yBounds && acceleration.y < 0) || (y >= this.yBounds && acceleration.y > 0)) {
+    if ((y >= this.yBounds) || (y <= -this.yBounds)) {
       this.emit('boundcollision');
+    }
+  }
+
+  score(goingLeft) {
+    if (goingLeft) {
+      this.poins.left++;
+    } else {
+      this.poins.right++;
     }
   }
 

@@ -1,5 +1,5 @@
 function moveElement($element, y, x) {
-  $element.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+  $element.style.transform = `translate3d(${x}px, ${y * (-1)}px, 0)`; // invert y to work as a cartesian plane
 }
 
 function areElementsOverlaping(a, b) {
