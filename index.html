@@ -6,41 +6,47 @@
   </head>
   <body>
     <style>
+
+      html,
+      body,
+      .container {
+        height: 100%;
+      }
+
       body {
         background-color: black;
         margin: 0;
+        overflow-y: hidden;
       }
 
       .pad {
         width: 30px;
         height: 100px;
-        margin: 30px;
         background-color: #fff;
-        position: absolute;
-        top: 43%;
       }
 
       .ball {
-        position: absolute;
-        top: 50%;
-        right: 50%;
         width: 30px;
         height: 30px;
         background-color: #fff;
       }
 
-      .right {
-        right: 0;
-      }
-
-      .left {
-        left: 0;
+      .container {
+        border-bottom: solid white 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: solid white 30px;
+        margin: 30px;
+        height: 82%;
       }
     </style>
 
-    <div class="pad left" style="transform: translate3d(0px, 0px, 0px);"></div>
-    <div class="ball" style="transform: translate3d(0px, 0px, 0px);"></div>
-    <div class="pad right" style="transform: translate3d(0px, 0px, 0px);"></div>
+    <div class="container">
+      <div class="pad left" style="transform: translate3d(0px, 0px, 0px);"></div>
+      <div class="ball" style="transform: translate3d(0px, 0px, 0px);"></div>
+      <div class="pad right" style="transform: translate3d(0px, 0px, 0px);"></div>
+    </div>
 
     <script async src="index.js"></script>
     <script src="util.js"></script>
