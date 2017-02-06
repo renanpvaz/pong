@@ -1,10 +1,8 @@
 class Pong {
   constructor() {
     const $container = document.querySelector('.container');
-    const BALL_SIZE = 30;
 
     this.$scores = document.querySelectorAll('.container h1');
-
     this.points = { left: 0, right: 0 };
     this.client = {};
     this.padArea = screen.width / 3;
@@ -18,8 +16,8 @@ class Pong {
     this.ball = new Ball(document.querySelector('.ball'), isMaster);
 
     if (!isMaster) {
-      client.subscribe('ball/acceleration');
-      client.subscribe('ball/positions');
+      client.subscribe(PUB_BALL_ACCELERATION);
+      client.subscribe(PUB_BALL_POSITION);
     }
 
     client.on('message', this.onMessage.bind(this));
@@ -40,29 +38,32 @@ class Pong {
     const message = payload.toString();
 
     switch (topic) {
-      case 'ball/acceleration':
+      case PUB_BALL_ACCELERATION:
         const [aX, aY] = message.split(',').map(val => parseInt(val));
         this.ball.acceleration = { x: aX, y: aY };
-        this.client.unsubscribe('ball/acceleration');
+        this.client.unsubscribe(PUB_BALL_ACCELERATION);
         break;
-      case 'ball/positions':
+      case PUB_BALL_POSITION:
         const parts = message.split(',');
         this.ball.posX = parts[0] >> 0;
         this.ball.posY = parts[1] >> 0;
         break;
-      case 'leftpad/position':
+      case PUB_LEFTPAD_POSITION:
         this.leftPad.posY = parseInt(message || '0');
         break;
-      case 'rightpad/position':
+      case PUB_RIGHTPAD_POSITION:
         this.rightPad.posY = parseInt(message || '0');
+        break;
+      case PUB_SCORE:
+        const points = message.split('-');
+        this.$scores[0].textContent = points[0];
+        this.$scores[1].textContent = points[0];
         break;
     }
   }
 
   createPads() {
-    const side = this.master ? 'right' : 'left' ;
-
-    this.client.subscribe(`${side}pad/position`);
+    this.client.subscribe(this.master ? PUB_RIGHTPAD_POSITION : PUB_LEFTPAD_POSITION);
     this.leftPad = new Pad(document.querySelector('.pad.left'), {}, this.master);
     this.rightPad = new Pad(document.querySelector('.pad.right'), { up: 38, down: 40 }, !this.master);
   }
@@ -103,19 +104,20 @@ class Pong {
     }
 
     this.ball.respawn('score');
+    this.client.publish('score', `${this.points.left}-${this.points.right}`);
   }
 
   tick() {
     this.paused = false;
 
-    if (this.ball.master) {
+    if (this.master) {
       setTimeout(this.checkXCollision.bind(this), 0);
       setTimeout(this.checkYCollision.bind(this), 0);
 
-      this.client.publish('ball/positions', (this.ball.posX + ',' + this.ball.posY));
-      this.client.publish('leftpad/position', this.leftPad.posY);
+      this.client.publish(PUB_BALL_POSITION, (this.ball.posX + ',' + this.ball.posY));
+      this.client.publish(PUB_LEFTPAD_POSITION, this.leftPad.posY);
     } else {
-      this.client.publish('rightpad/position', this.rightPad.posY);
+      this.client.publish(PUB_RIGHTPAD_POSITION, this.rightPad.posY);
     }
 
     this.emit('update');

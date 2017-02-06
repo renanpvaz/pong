@@ -1,12 +1,12 @@
 class Pad {
-  constructor($element, { up = 87, down = 83}, isMaster) {
-    const { y } = getTranslate($element);
+  constructor($element, { up = 87, down = 83}, controllable) {
     const intervals = {};
 
+    this.yBounds = (document.querySelector('.container').clientHeight / 2) - (PAD_SIZE / 2);
     this.$element = $element;
-    this.posY = y;
+    this.posY = 0;
 
-    if (isMaster) {
+    if (controllable) {
       const keys = {
         [up]: {
           press: () => this.move(1)
@@ -43,6 +43,12 @@ class Pad {
 
   move(acceleration) {
     this.posY += acceleration * 20;
+
+    if (this.posY >= this.yBounds) {
+      this.posY = this.yBounds;
+    } else if (this.posY <= -(this.yBounds)) {
+      this.posY = -(this.yBounds);
+    }
 
     moveElement(this.$element, this.posY, 0);
   }

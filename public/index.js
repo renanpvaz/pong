@@ -2,7 +2,7 @@
 window.addEventListener('load', () => {
   let master;
   const pong = new Pong();
-  const client = mqtt.connect('mqtt://localhost:1884');
+  const client = mqtt.connect('mqtt://10.99.3.69:1884');
 
   client.on('error', console.error);
 
