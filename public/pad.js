@@ -1,35 +1,44 @@
 class Pad {
-  constructor($element, { up = 87, down = 83}) {
+  constructor($element, { up = 87, down = 83}, isMaster) {
     const { y } = getTranslate($element);
     const intervals = {};
-    const keys = {
-      [up]: {
-        press: () => this.move(1)
-      },
-      [down]: {
-        press: () => this.move(-1)
-      }
-    };
 
     this.$element = $element;
     this.posY = y;
 
-    Object.keys(keys).forEach((code) => {
-      const keyCode = parseInt(code);
-
-      window.addEventListener('keydown', (e) => {
-        if(!intervals[keyCode] && keyCode === e.which) {
-          intervals[keyCode] = setInterval(() => keys[keyCode].press(), 50);
+    if (isMaster) {
+      const keys = {
+        [up]: {
+          press: () => this.move(1)
+        },
+        [down]: {
+          press: () => this.move(-1)
         }
-      });
+      };
 
-      window.addEventListener('keyup', (e) => {
-        if(keyCode === e.which) {
-          clearInterval(intervals[keyCode]);
-          intervals[keyCode] = null;
-        }
+      Object.keys(keys).forEach((code) => {
+        const keyCode = parseInt(code);
+
+        window.addEventListener('keydown', (e) => {
+          if(!intervals[keyCode] && keyCode === e.which) {
+            intervals[keyCode] = setInterval(() => keys[keyCode].press(), 50);
+          }
+        });
+
+        window.addEventListener('keyup', (e) => {
+          if(keyCode === e.which) {
+            clearInterval(intervals[keyCode]);
+            intervals[keyCode] = null;
+          }
+        });
       });
-    });
+    } else {
+      window.addEventListener('update', this.update.bind(this));
+    }
+  }
+
+  update() {
+    moveElement(this.$element, this.posY, 0);
   }
 
   move(acceleration) {

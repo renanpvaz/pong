@@ -20,9 +20,11 @@ class Pong {
     if (!isMaster) {
       client.subscribe('ball/acceleration');
       client.subscribe('ball/positions');
-      client.on('message', this.onMessage.bind(this));
     }
 
+    client.on('message', this.onMessage.bind(this));
+
+    this.createPads();
     this.lastRequest = requestAnimationFrame(this.tick.bind(this));
 
     window.addEventListener('keyup', (e) => {
@@ -48,12 +50,21 @@ class Pong {
         this.ball.posX = parts[0] >> 0;
         this.ball.posY = parts[1] >> 0;
         break;
+      case 'leftpad/position':
+        this.leftPad.posY = parseInt(message || '0');
+        break;
+      case 'rightpad/position':
+        this.rightPad.posY = parseInt(message || '0');
+        break;
     }
   }
 
   createPads() {
-    this.leftPad = new Pad(document.querySelector('.pad.left'), {});
-    this.rightPad = new Pad(document.querySelector('.pad.right'), { up: 38, down: 40 });
+    const side = this.master ? 'right' : 'left' ;
+
+    this.client.subscribe(`${side}pad/position`);
+    this.leftPad = new Pad(document.querySelector('.pad.left'), {}, this.master);
+    this.rightPad = new Pad(document.querySelector('.pad.right'), { up: 38, down: 40 }, !this.master);
   }
 
   checkXCollision() {
@@ -96,15 +107,18 @@ class Pong {
 
   tick() {
     this.paused = false;
-    this.emit('update');
 
     if (this.ball.master) {
       setTimeout(this.checkXCollision.bind(this), 0);
       setTimeout(this.checkYCollision.bind(this), 0);
 
       this.client.publish('ball/positions', (this.ball.posX + ',' + this.ball.posY));
+      this.client.publish('leftpad/position', this.leftPad.posY);
+    } else {
+      this.client.publish('rightpad/position', this.rightPad.posY);
     }
 
+    this.emit('update');
     this.lastRequest = requestAnimationFrame(this.tick.bind(this));
   }
 

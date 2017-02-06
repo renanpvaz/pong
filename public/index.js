@@ -22,8 +22,6 @@ window.addEventListener('load', () => {
         if (!master) {
           client.publish('start');
         }
-
-        pong.createPads();
         break;
       case 'start':
         pong.start(client, master);
