@@ -16,8 +16,7 @@ class Pong {
     this.ball = new Ball(document.querySelector('.ball'), isMaster);
 
     if (!isMaster) {
-      client.subscribe(PUB_BALL_ACCELERATION);
-      client.subscribe(PUB_BALL_POSITION);
+      client.subscribe([PUB_BALL_ACCELERATION, PUB_BALL_POSITION, PUB_SCORE]);
     }
 
     client.on('message', this.onMessage.bind(this));
@@ -57,7 +56,7 @@ class Pong {
       case PUB_SCORE:
         const points = message.split('-');
         this.$scores[0].textContent = points[0];
-        this.$scores[1].textContent = points[0];
+        this.$scores[1].textContent = points[1];
         break;
     }
   }
@@ -103,8 +102,8 @@ class Pong {
       this.$scores[1].textContent = this.points.right;
     }
 
-    this.ball.respawn('score');
-    this.client.publish('score', `${this.points.left}-${this.points.right}`);
+    this.ball.respawn();
+    this.client.publish(PUB_SCORE, `${this.points.left}-${this.points.right}`);
   }
 
   tick() {
