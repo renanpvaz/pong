@@ -19,7 +19,7 @@ class Pong {
       client.subscribe([PUB_BALL_ACCELERATION, PUB_BALL_POSITION, PUB_SCORE]);
     }
 
-    client.on('message', this.onMessage.bind(this));
+    client.on('message', this.handleMessage.bind(this));
 
     this.createPads();
     this.lastRequest = requestAnimationFrame(this.tick.bind(this));
@@ -33,15 +33,10 @@ class Pong {
     });
   }
 
-  onMessage(topic, payload) {
+  handleMessage(topic, payload) {
     const message = payload.toString();
 
     switch (topic) {
-      case PUB_BALL_ACCELERATION:
-        const [aX, aY] = message.split(',').map(val => parseInt(val));
-        this.ball.acceleration = { x: aX, y: aY };
-        this.client.unsubscribe(PUB_BALL_ACCELERATION);
-        break;
       case PUB_BALL_POSITION:
         const parts = message.split(',');
         this.ball.posX = parts[0] >> 0;
