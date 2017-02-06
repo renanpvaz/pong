@@ -2,7 +2,7 @@
 window.addEventListener('load', () => {
   let master;
   const pong = new Pong();
-  const client = mqtt.connect('mqtt://10.99.3.69:1884');
+  const client = mqtt.connect('mqtt://localhost:1884');
 
   client.on('error', console.error);
 
@@ -16,10 +16,10 @@ window.addEventListener('load', () => {
     const message = payload.toString();
 
     if (topic === 'whoami') {
-      master = message === this.client.options.clientId;
-      client.unsubscribe('master');
+      master = message === client.options.clientId;
+      client.unsubscribe('whoami');
+      console.log('you are ' + (master ? '' : 'not ') + 'master');
     }
 
-    console.log('you are ' + (master ? '' : 'not') + ' master');
   });
 });

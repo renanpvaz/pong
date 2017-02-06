@@ -19,12 +19,25 @@ server.on('ready', () => {
   pino.info(`Server is running at http://localhost:1883`);
 });
 
+server.on('subscribed', (topic, client) => {
+  if (topic === 'whoami') {
+    const message = { topic: 'whoami' };
+
+    if (!topics.waiting) {
+      message.payload = client.id;
+    } else {
+      message.payload = topics.waiting.id;
+    }
+
+    server.publish(message);
+  }
+});
+
 server.on('clientConnected', (client) => {
   if (!topics.waiting) {
     topics.waiting = client;
-    server.publish({ topic: 'whoami', payload: client.id });
     pino.info('left player is waiting');
-  } else {
+  } else if (topics.waiting.id !== client.id) {
     topics.games[topics.waiting.id] = {
       left: topics.waiting,
       right: client
