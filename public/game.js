@@ -6,14 +6,23 @@ class Pong {
     this.$scores = document.querySelectorAll('.container h1');
 
     this.points = { left: 0, right: 0 };
+    this.client = {};
     this.padArea = screen.width / 3;
     this.yBounds = ($container.clientHeight / 2) - (BALL_SIZE / 2);
     this.xBounds = ($container.clientWidth / 2) - (BALL_SIZE / 2);
   }
 
   start(client, isMaster) {
-    this.ball = new Ball(document.querySelector('.ball'));
-    this.client.on('message', this.onMessage.bind(this));
+    this.client = client;
+    this.master = isMaster;
+    this.ball = new Ball(document.querySelector('.ball'), isMaster);
+
+    if (!isMaster) {
+      client.subscribe('ball/acceleration');
+      client.subscribe('ball/positions');
+      client.on('message', this.onMessage.bind(this));
+    }
+
     this.lastRequest = requestAnimationFrame(this.tick.bind(this));
 
     window.addEventListener('keyup', (e) => {
@@ -42,20 +51,21 @@ class Pong {
     }
   }
 
-  createPad(which) {
-    this[`${which}Pad`] = new Pad(document.querySelector(`.pad.${which}`));
+  createPads() {
+    this.leftPad = new Pad(document.querySelector('.pad.left'), {});
+    this.rightPad = new Pad(document.querySelector('.pad.right'), { up: 38, down: 40 });
   }
 
   checkXCollision() {
     const { $element, goingLeft, posX: x } = this.ball;
 
-    if (x <= -(this.padArea) && goingLeft) {
+    if (x <= -(this.padArea)) {
       if (areElementsOverlapping(this.leftPad.$element, $element)) {
         this.emit('padcollision');
       } else if (x <= -this.xBounds) {
         this.score(goingLeft);
       }
-    } else if (x >= (this.padArea) && !goingLeft) {
+    } else if (x >= this.padArea) {
       if (areElementsOverlapping(this.rightPad.$element, $element)) {
         this.emit('padcollision');
       } else if (x >= this.xBounds) {

@@ -1,12 +1,18 @@
 class Ball {
-  constructor($element) {
-    this.acceleration = this.getRandomAcceleration();
+  constructor($element, master) {
+    this.master = master;
 
-    this.goingLeft = this.acceleration.x < 0;
+    if (master) {
+      this.acceleration = {
+        y: 5 * (Math.round(Math.random()) || -1),
+        x: 5 * (Math.round(Math.random()) || -1)
+      };
+      this.goingLeft = this.acceleration.x < 0;
+    }
+
     this.posY = 0;
     this.posX = 0;
     this.$element = $element;
-    this.master = true;
 
     window.addEventListener('update', this.update.bind(this));
     window.addEventListener('padcollision', debounce(() => this.invert('x'), 100, true));

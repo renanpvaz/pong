@@ -21,30 +21,24 @@ server.on('ready', () => {
 
 server.on('subscribed', (topic, client) => {
   if (topic === 'whoami') {
-    const message = { topic: 'whoami' };
-
-    if (!topics.waiting) {
-      message.payload = client.id;
+    if (topics.waiting.id === client.id) {
+      server.publish({ topic: 'whoami', payload: client.id });
+      console.log('left connected - id ' + client.id);
     } else {
-      message.payload = topics.waiting.id;
+      server.publish({ topic: 'whoami', payload: topics.waiting.id });
+      console.log('right connected - id ' + client.id);
+      delete topics.waiting;
     }
-
-    server.publish(message);
   }
 });
 
 server.on('clientConnected', (client) => {
   if (!topics.waiting) {
     topics.waiting = client;
-    pino.info('left player is waiting');
   } else if (topics.waiting.id !== client.id) {
     topics.games[topics.waiting.id] = {
       left: topics.waiting,
       right: client
     };
-
-    pino.info('game created');
-
-    delete topics.waiting;
   }
 });

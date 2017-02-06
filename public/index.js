@@ -7,19 +7,28 @@ window.addEventListener('load', () => {
   client.on('error', console.error);
 
   client.on('connect', () => {
-    client.subscribe('ball/acceleration');
-    client.subscribe('ball/positions');
     client.subscribe('whoami');
+    client.subscribe('start');
   });
 
   client.on('message', (topic, payload) => {
     const message = payload.toString();
 
-    if (topic === 'whoami') {
-      master = message === client.options.clientId;
-      client.unsubscribe('whoami');
-      console.log('you are ' + (master ? '' : 'not ') + 'master');
-    }
+    switch (topic) {
+      case 'whoami':
+        master = message === client.options.clientId;
+        client.unsubscribe('whoami');
 
+        if (!master) {
+          client.publish('start');
+        }
+
+        pong.createPads();
+        break;
+      case 'start':
+        pong.start(client, master);
+        client.unsubscribe('start');
+        break;
+    }
   });
 });

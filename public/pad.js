@@ -1,12 +1,12 @@
 class Pad {
-  constructor($element, upKey = 87, downKey = 83) {
+  constructor($element, { up = 87, down = 83}) {
     const { y } = getTranslate($element);
     const intervals = {};
     const keys = {
-      [upKey]: {
+      [up]: {
         press: () => this.move(1)
       },
-      [downKey]: {
+      [down]: {
         press: () => this.move(-1)
       }
     };
